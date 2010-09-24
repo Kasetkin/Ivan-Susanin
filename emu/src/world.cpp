@@ -104,61 +104,42 @@ world::~world()
     data_->device_->drop();
 }
 
+#define PY_PREPARE(foo, arg)\
+    using namespace boost::python;\
+      object main = import("__main__");\
+      object global(main.attr("__dict__"));\
+      hardware * hw = new hardware(data_->controller_);\
+      object Tclass = class_<hardware>("hardware", init<hardware>())\
+          .def("ray_distance", &hardware::ray_distance)\
+          .def("set_speed", &hardware::set_speed);\
+      object hard = Tclass(*hw);\
+      global["robo"] = hard;\
+      //handle<> x(hard);\
+      object result = foo(arg.c_str(),\
+      global, global);\
+    }\
+    catch (boost::python::error_already_set)\
+    {\
+        //std::cerr << "EX: " << e.what() << std::endl;\
+        PyErr_Print();\
+        throw;\
+    }\
+
+
 void world::run_script(std::string const & script)
 {
-  try
-  {
-    using namespace boost::python;
-    object main = import("__main__");
-    object global(main.attr("__dict__"));
-    hardware * hw = new hardware(data_->controller_);
-    object Tclass = class_<hardware>("hardware", init<hardware>())
-        .def("ray_distance", &hardware::ray_distance)
-        .def("set_speed", &hardware::set_speed);
-    object hard = Tclass(*hw);
-    global["robo"] = hard;
-    //handle<> x(hard);
 
-
-    object result = exec(script.c_str(),
-      global, global);
-  }
-  catch (boost::python::error_already_set)
-  {
-      //std::cerr << "EX: " << e.what() << std::endl;
-      PyErr_Print();
-      throw;
-  }
+      PY_PREPARE(exec, script)
 
 }
 
 void world::run_file(std::string const & file)
 {
-  try
-  {
-    using namespace boost::python;
-    object main = import("__main__");
-    object global(main.attr("__dict__"));
-    hardware * hw = new hardware(data_->controller_);
-    object Tclass = class_<hardware>("hardware", init<hardware>())
-        .def("ray_distance", &hardware::ray_distance)
-        .def("set_speed", &hardware::set_speed);
-    object hard = Tclass(*hw);
-    global["robo"] = hard;
-    //handle<> x(hard);
-
-
-    object result = exec_file(file.c_str(),
-      global, global);
-  }
-  catch (boost::python::error_already_set)
-  {
-      //std::cerr << "EX: " << e.what() << std::endl;
-      PyErr_Print();
-      throw;
-  }
+    PY_PREPARE(exec_file, file)
   
 }
+
+
 
 void world::stop()
 {

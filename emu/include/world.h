@@ -21,6 +21,7 @@ class world
     void stop();
     void reset();
   private:
+    void python_prepare();
     void routine();
     struct pimpl;
     boost::shared_ptr<pimpl> data_;

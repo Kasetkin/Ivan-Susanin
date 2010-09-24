@@ -15,13 +15,15 @@ set(MOC_HEADERS
 )
 
 set(UI
-    ../include/mainwindows.ui
+    ../include/mainwindow.ui
 )
 
 QT4_WRAP_CPP (MOC_SOURCES ${MOC_HEADERS})
 qt4_wrap_ui(UI_HEADERS ${UI} )
 
-add_executable(emu ${SOURCES} ${MOC_SOURCES})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable(emu ${SOURCES} ${MOC_SOURCES} ${UI_HEADERS})
 target_link_libraries(emu
     ${Irrlicht_LIBRARIES}
     ${PYTHON_LIBRARIES}

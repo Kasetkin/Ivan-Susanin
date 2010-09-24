@@ -21,8 +21,11 @@ private:
 
 public slots:
     void newFile();
+    void openFile();
+    void saveFile();
     void runRun();
     void tabCloseRequested(int index);
+    void loadFile(const QString &fileName);
 };
 
 #endif // MAINWINDOW_H
