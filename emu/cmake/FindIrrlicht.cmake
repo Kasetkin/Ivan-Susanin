@@ -3,7 +3,7 @@ include(FindPkgMacros)
 
 set(Irrlicht_ROOT ${Irrlicht_HOME} ${Irrlicht_ROOT})
 
-findpkg_begin(MyGUI)
+findpkg_begin(Irrlicht)
 
 FIND_PATH(Irrlicht_INCLUDE_DIR irrlicht.h
 	${Irrlicht_ROOT}/include

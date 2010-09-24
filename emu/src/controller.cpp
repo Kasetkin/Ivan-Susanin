@@ -1,17 +1,44 @@
+const double PI = 3.14;
+
 #include "controller.h"
 
-#include <ISceneCollisionManager.h>
-#include <ISceneNode.h>
-#include <line3d.h>
+#include <irrlicht.h>
+
 #include <iostream>
 
 namespace environment
 {
 using namespace irr;
   
-controller::controller(scene::ISceneCollisionManager * collision_manager) :
-  collision_manager_(collision_manager)
+controller::controller(irr::IrrlichtDevice *device) :
+  collision_manager_(device->getSceneManager()->getSceneCollisionManager())
 {
+    position_ = vector3(-70,-66,-60);
+    direction_ = vector3(0, 0, 1);
+    
+    //camera_ = device->getSceneManager()->addCameraSceneNodeFPS(0, position_, direction_, 1);
+    //camera_->setPosition(position_);
+    //camera_->setTarget(direction_);
+    lspeed_ = 0;
+    rspeed_ = 0;
+    
+
+    scene::ISceneManager* smgr = device->getSceneManager();
+    
+    node_ = smgr->addAnimatedMeshSceneNode(smgr->getMesh("../../media/dwarf.x"),
+                        0, 0);
+    node_->setPosition(position_);
+    node_->setRotation(core::vector3df(0,90,0));
+    rotation = PI / 2;
+    node_->setAnimationSpeed(10.f);
+    node_->getMaterial(0).NormalizeNormals = true;
+    // Just do the same as we did above.
+    //selector = smgr->createTriangleSelector(node);
+    //node->setTriangleSelector(selector);
+    //selector->drop();
+
+    //material.setTexture(0, 0);
+    //material.Lighting = false;
 }
 
 controller::~controller()
@@ -61,15 +88,24 @@ double controller::cone_traverse(double angle) const
 void controller::set_speed(double left, 
                 double right)
 {
-    std::cerr << 
+    /*std::cerr << 
       "WARNING: void environment::controller::set_speed"
       "(double, double) not implemented yet" 
-      << std::endl;
+      << std::endl;*/
+    lspeed_ = left;
+    rspeed_ = right;
 }
 
 void controller::draw()
 {
+      
+    //position_ += direction_ * std::min(lspeed, rspeed);
+    rotation = 0;
+    node_->setPosition(position_);
+    node_->setRotation(vector3(0, rotation * 180 / PI, 0));
     
+    //camera_->setPosition(position_);
+    //camera_->setTarget(position_ + direction_);
 }
 
 }

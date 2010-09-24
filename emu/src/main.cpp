@@ -1,10 +1,10 @@
-#include "world.h"
+#include <QtGui/QApplication>
+#include "mainwindow.h"
 
-int main()
+int main(int argc, char *argv[])
 {
-    environment::world w("Test App");
-    //w.run_script("print \"hello\"\n\0");
-    w.run_file("../../s.py");
-    while(true);
-    return 0;
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
+    return a.exec();
 }

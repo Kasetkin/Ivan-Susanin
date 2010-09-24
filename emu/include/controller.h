@@ -9,7 +9,10 @@ namespace irr
 namespace scene
 {
   class ISceneCollisionManager;
+  class ICameraSceneNode;
+  class IAnimatedMeshSceneNode;
 }
+class IrrlichtDevice;
 }
 
 namespace environment
@@ -17,7 +20,7 @@ namespace environment
 class controller
 {
   public:
-    controller(irr::scene::ISceneCollisionManager * collision_manager);
+    controller(irr::IrrlichtDevice * device);
     ~controller();
     double ray_traverse(vector3 const & direction) const;
     double cone_traverse(vector3 const & direction, 
@@ -31,8 +34,12 @@ class controller
     
   private:
     irr::scene::ISceneCollisionManager * collision_manager_;
+    irr::scene::ICameraSceneNode * camera_;
+    irr::scene::IAnimatedMeshSceneNode* node_;
     vector3 position_;
     vector3 direction_;
+    double lspeed_, rspeed_;
+    double rotation;
 };
 }
 
