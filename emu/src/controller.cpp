@@ -98,9 +98,10 @@ void controller::set_speed(double left,
 
 void controller::draw()
 {
-      
-    //position_ += direction_ * std::min(lspeed, rspeed);
-    rotation = 0;
+    double l = 0;  
+    double omega = (lspeed_ - rspeed_) / l;
+    double alpha = omega;
+    direction_ = vector3(direction.getX() * cos(alpha) - direction.getZ() * sin(alpha), direction_.getY(), direction_.getX * sin(alpha) + direction.getZ() * cos(alpha));
     node_->setPosition(position_);
     node_->setRotation(vector3(0, rotation * 180 / PI, 0));
     
