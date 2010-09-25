@@ -68,7 +68,7 @@ world::world(std::string const & title,
         q3node = data_->device_->getSceneManager()->addOctreeSceneNode(q3levelmesh->getMesh(0), 0, 0);
 
     data_->nWorld_ = NewtonCreate(NULL,NULL);
-    SObject * co = new SObject(q3node, CreateTreeCollisionFromMesh(data_->nWorld_, q3levelmesh));
+    SObject * co = new SObject(q3node->getPosition(), CreateTreeCollisionFromMesh(data_->nWorld_, q3levelmesh));
     
     /*
     So far so good, we've loaded the quake 3 level like in tutorial 2. Now,
@@ -129,7 +129,6 @@ world::~world()
           .def("set_speed", &hardware::set_speed);\
       object hard = Tclass(*hw);\
       global["robo"] = hard;\
-      std::cout << "PYTHON: foo" << arg << std::endl;\
       object result = foo(arg.c_str(),\
       global, global);\
     }\
@@ -142,8 +141,7 @@ world::~world()
 
 void world::run_script(std::string const & script)
 {
-  std::cout << "RUN SCRIPT !!!!!!!!!!!!!!!!!!" << std::endl;
-  PY_PREPARE(exec, script)
+    PY_PREPARE(exec, script)
 }
 
 void world::run_file(std::string const & file)

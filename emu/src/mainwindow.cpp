@@ -34,6 +34,9 @@ MainWindow::MainWindow(QWidget *parent)
     runMenu->addAction(tr("&Run"), this, SLOT(runRun()),
                         QKeySequence(tr("Ctrl+R",
                                          "Run|Run")));
+    runMenu->addAction(tr("&Run File"), this, SLOT(runRunFile()),
+                        QKeySequence(tr("Ctrl+R",
+                                         "Run|RunFile")));
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(tabCloseRequested(int)));
 
 
@@ -106,10 +109,23 @@ void MainWindow::runRun()
     const char * script = text.toAscii().data();
     environment::world * w = new environment::world("Virtual world");
     w->start();
-    //w->run_script(script);
-    w->run_file("../../s.py");
+    w->run_script(script);
+    //w->run_file("../../s.py");
 
 
+}
+
+void MainWindow::runRunFile()
+{
+    QString fileName = QFileDialog::getOpenFileName(this);
+    if (!fileName.isEmpty())
+    {
+        environment::world * w = new environment::world("Virtual world");
+        w->start();
+        const char * script = fileName.toAscii().data();
+        //w->run_script(script);
+        w->run_file(script);
+    }
 }
 
 void MainWindow::tabCloseRequested(int index)

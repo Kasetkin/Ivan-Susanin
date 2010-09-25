@@ -141,12 +141,13 @@ void controller::draw()
     direction_.getAs4Values(coords);
     //std::cout << "POSITION: " << coords[0] << " " << coords[1] << " " << coords[2] << std::endl;
     node_->setPosition(position_);
-
-    /*if (CheckForCollision(nWorld_, land_, SObject(node_, nwtn_collision_)))
+    SObject co(position_, nwtn_collision_);
+    if (CheckForCollision(nWorld_, land_, &co))
     {
         position_ = ppos;
         node_->setPosition(position_);
-    }*/
+        std::cout << "COLLISION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    }
     
     rotation = -atan2(coords[2], coords[0]);
     //std::cout << rotation << std::endl;

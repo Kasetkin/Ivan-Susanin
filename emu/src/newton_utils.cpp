@@ -118,8 +118,8 @@ bool CheckForCollision(NewtonWorld *nWorld, SObject *obj_A, SObject *obj_B)
     mat_A.makeIdentity();
     mat_B.makeIdentity();
 
-    mat_A.setTranslation(obj_A->irr_node->getPosition());
-    mat_B.setTranslation(obj_B->irr_node->getPosition());
+    mat_A.setTranslation(obj_A->pos);
+    mat_B.setTranslation(obj_B->pos);
 
     const int nContacts = 2;
     float contacts[3 * nContacts];

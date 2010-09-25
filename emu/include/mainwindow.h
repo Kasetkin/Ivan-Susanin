@@ -24,6 +24,7 @@ public slots:
     void openFile();
     void saveFile();
     void runRun();
+    void runRunFile();
     void tabCloseRequested(int index);
     void loadFile(const QString &fileName);
 };

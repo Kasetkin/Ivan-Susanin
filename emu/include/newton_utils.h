@@ -4,14 +4,16 @@
 class NewtonWorld;
 class NewtonCollision;
 #include <irrlicht.h>
+#include "types.h"
 struct SObject
 {
-  SObject(irr::scene::IMeshSceneNode *irr_node_, NewtonCollision *nwtn_collision_) :
-      irr_node(irr_node_), nwtn_collision(nwtn_collision_)
+  SObject(vector3 const & position, NewtonCollision *nwtn_collision_) :
+      pos(position), nwtn_collision(nwtn_collision_)
   {
   }
 //Irrlicht scene node
-irr::scene::IMeshSceneNode *irr_node;
+//irr::scene::IMeshSceneNode *irr_node;
+vector3 pos;
 //Newton collision object
 NewtonCollision *nwtn_collision;
 };
