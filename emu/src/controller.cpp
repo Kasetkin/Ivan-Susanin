@@ -32,6 +32,7 @@ controller::controller(irr::IrrlichtDevice *device, SObject * land, NewtonWorld 
     
     node_ = smgr->addAnimatedMeshSceneNode(smgr->getMesh("../../media/dwarf.x"),
                         0, 0);
+    node_->setScale(core::vector3df(0.3, 0.3, 0.3));
     node_->setPosition(position_);
     node_->setRotation(core::vector3df(0,90,0));
     rotation = PI / 2;
@@ -152,7 +153,7 @@ void controller::draw()
     rotation = -atan2(coords[2], coords[0]);
     //std::cout << rotation << std::endl;
     node_->setRotation(vector3(0, -90 + rotation * 180 / PI, 0));
-    camera_->setPosition(position_ - 100 * direction_ + vector3(0, 100, 0));
+    camera_->setPosition(position_ - 40 * direction_ + vector3(0, 40, 0));
     camera_->setTarget(position_);
     
     //camera_->setPosition(position_);
