@@ -50,9 +50,9 @@ world::world(std::string const & title,
     if (data_->device_ == 0)
         return; //FIXME: throw here
 
-    scene::ICameraSceneNode * camera = data_->device_->getSceneManager()->addCameraSceneNodeFPS(0, 100.0f, .3f, 0, 0, 0, true, 3.f);
-    camera->setPosition(core::vector3df(50,50,-60));
-    camera->setTarget(core::vector3df(-70,30,-60));
+    //scene::ICameraSceneNode * camera = data_->device_->getSceneManager()->addCameraSceneNodeFPS(0, 100.0f, .3f, 0, 0, 0, true, 3.f);
+    //camera->setPosition(core::vector3df(50,50,-60));
+    //camera->setTarget(core::vector3df(-70,30,-60));
 
     data_->device_->getFileSystem()->addZipFileArchive("../../media/map-20kdm2.pk3");
 
@@ -90,22 +90,27 @@ world::world(std::string const & title,
 
         
     data_->controller_ = boost::make_shared<controller>(data_->device_);    
-    data_->thread_ = boost::make_shared<boost::thread>(
-        boost::bind(&world::routine, this));
+    //data_->thread_ = boost::make_shared<boost::thread>(
+    //    boost::bind(&world::routine, this));
     Py_Initialize();
     
 }
 
 world::~world()
 {
+    std::cout << "~world()" << std::endl;
+    int * a = 0;
+    *a = 1;
     Py_Finalize();
-    boost::lock_guard<boost::mutex> lock(data_->mutex_);
+    
     data_->device_->closeDevice();
+    boost::lock_guard<boost::mutex> lock(data_->mutex_);
     data_->device_->drop();
 }
 
 #define PY_PREPARE(foo, arg)\
     using namespace boost::python;\
+    try { \
       object main = import("__main__");\
       object global(main.attr("__dict__"));\
       hardware * hw = new hardware(data_->controller_);\
@@ -114,32 +119,36 @@ world::~world()
           .def("set_speed", &hardware::set_speed);\
       object hard = Tclass(*hw);\
       global["robo"] = hard;\
-      //handle<> x(hard);\
+      std::cout << "PYTHON: foo" << arg << std::endl;\
       object result = foo(arg.c_str(),\
       global, global);\
     }\
     catch (boost::python::error_already_set)\
     {\
-        //std::cerr << "EX: " << e.what() << std::endl;\
         PyErr_Print();\
         throw;\
-    }\
+    }
 
 
 void world::run_script(std::string const & script)
 {
-
-      PY_PREPARE(exec, script)
-
+  std::cout << "RUN SCRIPT !!!!!!!!!!!!!!!!!!" << std::endl;
+  PY_PREPARE(exec, script)
 }
 
 void world::run_file(std::string const & file)
 {
-    PY_PREPARE(exec_file, file)
-  
+//  boost::lock_guard<boost::mutex> lock(data_->mutex_);
+  PY_PREPARE(exec_file, file)
+    
 }
 
-
+void world::start()
+{
+    data_->thread_ = boost::make_shared<boost::thread>(
+        boost::bind(&world::routine, this));
+   
+}
 
 void world::stop()
 {
@@ -151,14 +160,18 @@ void world::reset()
 
 void world::routine()
 {
-  
-    video::IVideoDriver * driver = data_->device_->getVideoDriver();
-    scene::ISceneManager* smgr = data_->device_->getSceneManager();
-    for (;;)
+    video::IVideoDriver * driver = 0;
+    scene::ISceneManager* smgr = 0;
+    {
+      boost::lock_guard<boost::mutex> lock(data_->mutex_);
+      driver = data_->device_->getVideoDriver();
+      smgr = data_->device_->getSceneManager();
+    }
+    for(;;)
     {
         boost::lock_guard<boost::mutex> lock(data_->mutex_);
         if (!data_->device_->run())
-            break;
+            return;
         
         if (data_->device_->isWindowActive())
         {

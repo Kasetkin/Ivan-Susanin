@@ -19,6 +19,7 @@ class world
     void run_script(std::string const & script);
     void run_file(std::string const & file);
     void stop();
+    void start();
     void reset();
   private:
     void python_prepare();

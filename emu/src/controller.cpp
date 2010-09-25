@@ -13,12 +13,13 @@ using namespace irr;
 controller::controller(irr::IrrlichtDevice *device) :
   collision_manager_(device->getSceneManager()->getSceneCollisionManager())
 {
+    boost::lock_guard<boost::mutex> lock(mutex_);
     position_ = vector3(-70,-66,-60);
     direction_ = vector3(0, 0, 1);
     
-    //camera_ = device->getSceneManager()->addCameraSceneNodeFPS(0, position_, direction_, 1);
-    //camera_->setPosition(position_);
-    //camera_->setTarget(direction_);
+    camera_ = device->getSceneManager()->addCameraSceneNode(0, position_, direction_, 1);
+    camera_->setPosition(position_ - 20 * direction_ + vector3(0, 20, 0));
+    camera_->setTarget(position_);
     lspeed_ = 0;
     rspeed_ = 0;
     
@@ -47,9 +48,15 @@ controller::~controller()
 
 double controller::ray_traverse(vector3 const & direction) const
 {
+    float coords[4];
+    direction.getAs4Values(coords);
+    vector3 dir(coords[0] * cos(-rotation) - coords[2] * sin(-rotation),
+                coords[1], 
+                coords[0] * sin(-rotation) + coords[2] * cos(-rotation));
+    boost::lock_guard<boost::mutex> lock(mutex_);
     core::line3d<f32> ray;
-    ray.start = position_;
-    ray.end = direction_ * 1000.0f;
+    ray.start = position_ + vector3(0, 5, 0);
+    ray.end = position_  + vector3(0, 5, 0) + dir * 1000.0f;
 
     core::vector3df intersection;
     core::triangle3df hitTriangle;
@@ -68,6 +75,7 @@ double controller::ray_traverse(vector3 const & direction) const
 double controller::cone_traverse(vector3 const & direction, 
                       double angle) const
 {
+    boost::lock_guard<boost::mutex> lock(mutex_);
     std::cerr << 
       "WARNING: double environment::controller::cone_traverse"
       "(vector3 const &, vector3 const &) not implemented yet" 
@@ -77,17 +85,20 @@ double controller::cone_traverse(vector3 const & direction,
 
 double controller::ray_traverse() const
 {
+    boost::lock_guard<boost::mutex> lock(mutex_);
     return ray_traverse(direction_);
 }
 
 double controller::cone_traverse(double angle) const
 {
+    boost::lock_guard<boost::mutex> lock(mutex_);
     return cone_traverse(direction_, angle);
 }
 
 void controller::set_speed(double left, 
                 double right)
 {
+    boost::lock_guard<boost::mutex> lock(mutex_);
     /*std::cerr << 
       "WARNING: void environment::controller::set_speed"
       "(double, double) not implemented yet" 
@@ -98,12 +109,37 @@ void controller::set_speed(double left,
 
 void controller::draw()
 {
-    double l = 0;  
+    boost::lock_guard<boost::mutex> lock(mutex_);
+    
+    //lspeed_ = 0;
+    //rspeed_ = 0;
+    
+    double l = 20;  
     double omega = (lspeed_ - rspeed_) / l;
     double alpha = omega;
-    direction_ = vector3(direction.getX() * cos(alpha) - direction.getZ() * sin(alpha), direction_.getY(), direction_.getX * sin(alpha) + direction.getZ() * cos(alpha));
+    double beta = alpha / 2;
+    float coords[4];
+    direction_.getAs4Values(coords);
+    direction_ = vector3(coords[0] * cos(alpha)
+        - coords[2] * sin(alpha), 
+        coords[1], 
+        coords[0] * sin(alpha)
+        + coords[2] * cos(alpha));
+    
+    direction_ = direction_.normalize();
+    position_ += (lspeed_ + rspeed_) / 2 * vector3(coords[0] * cos(beta)
+        - coords[2] * sin(beta), 
+        coords[1], 
+        coords[0] * sin(beta)
+        + coords[2] * cos(beta));
+    direction_.getAs4Values(coords);
+    //std::cout << "POSITION: " << coords[0] << " " << coords[1] << " " << coords[2] << std::endl;
     node_->setPosition(position_);
-    node_->setRotation(vector3(0, rotation * 180 / PI, 0));
+    rotation = -atan2(coords[2], coords[0]);
+    //std::cout << rotation << std::endl;
+    node_->setRotation(vector3(0, -90 + rotation * 180 / PI, 0));
+    camera_->setPosition(position_ - 100 * direction_ + vector3(0, 100, 0));
+    camera_->setTarget(position_);
     
     //camera_->setPosition(position_);
     //camera_->setTarget(position_ + direction_);

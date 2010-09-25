@@ -3,6 +3,9 @@
 
 #include "types.h"
 
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/locks.hpp>
+
 //forward declarations
 namespace irr
 {
@@ -40,6 +43,7 @@ class controller
     vector3 direction_;
     double lspeed_, rspeed_;
     double rotation;
+    mutable boost::mutex mutex_; 
 };
 }
 

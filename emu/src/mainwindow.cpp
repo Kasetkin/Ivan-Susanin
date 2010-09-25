@@ -105,8 +105,9 @@ void MainWindow::runRun()
 
     const char * script = text.toAscii().data();
     environment::world * w = new environment::world("Virtual world");
+    w->start();
     //w->run_script(script);
-    //w->run_file("../../s.py");
+    w->run_file("../../s.py");
 
 
 }
