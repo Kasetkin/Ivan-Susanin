@@ -31,9 +31,9 @@ MainWindow::MainWindow(QWidget *parent)
                                           "File|Save")));
     QMenu *runMenu = new QMenu(tr("&Run"), this);
     menuBar()->addMenu(runMenu);
-    runMenu->addAction(tr("&Run"), this, SLOT(runRun()),
+    /*runMenu->addAction(tr("&Run"), this, SLOT(runRun()),
                         QKeySequence(tr("Ctrl+R",
-                                         "Run|Run")));
+                                         "Run|Run")));*/
     runMenu->addAction(tr("&Run File"), this, SLOT(runRunFile()),
                         QKeySequence(tr("Ctrl+R",
                                          "Run|RunFile")));

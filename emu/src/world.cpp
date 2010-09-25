@@ -26,6 +26,7 @@ struct world::pimpl
 {
     boost::shared_ptr<controller> controller_;
     boost::shared_ptr<boost::thread> thread_;
+    boost::shared_ptr<boost::thread> py_thread_;
     irr::IrrlichtDevice *device_;
     boost::mutex mutex_;
     NewtonWorld *nWorld_;
@@ -129,8 +130,8 @@ world::~world()
           .def("set_speed", &hardware::set_speed);\
       object hard = Tclass(*hw);\
       global["robo"] = hard;\
-      object result = foo(arg.c_str(),\
-      global, global);\
+      data_->py_thread_ = boost::make_shared<boost::thread>(\
+        boost::bind(&foo, arg.c_str(), global, global));\
     }\
     catch (boost::python::error_already_set)\
     {\
@@ -181,7 +182,7 @@ void world::routine()
         if (!data_->device_->run())
             return;
         
-        if (data_->device_->isWindowActive())
+        //if (data_->device_->isWindowActive())
         {
             data_->controller_->draw();
             driver->beginScene(true, true, 0);
