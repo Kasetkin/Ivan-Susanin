@@ -3,15 +3,19 @@ const double PI = 3.14;
 #include "controller.h"
 
 #include <irrlicht.h>
+#include <Newton.h>
 
 #include <iostream>
+
 
 namespace environment
 {
 using namespace irr;
   
-controller::controller(irr::IrrlichtDevice *device) :
-  collision_manager_(device->getSceneManager()->getSceneCollisionManager())
+controller::controller(irr::IrrlichtDevice *device, SObject * land, NewtonWorld *nWorld) :
+  collision_manager_(device->getSceneManager()->getSceneCollisionManager()),
+  land_(land),
+  nWorld_(nWorld)
 {
     boost::lock_guard<boost::mutex> lock(mutex_);
     position_ = vector3(-70,-66,-60);
@@ -40,6 +44,7 @@ controller::controller(irr::IrrlichtDevice *device) :
 
     //material.setTexture(0, 0);
     //material.Lighting = false;
+    nwtn_collision_ = CreateTreeCollisionFromMesh(nWorld_, smgr->getMesh("../../media/dwarf.x"));
 }
 
 controller::~controller()
@@ -127,6 +132,7 @@ void controller::draw()
         + coords[2] * cos(alpha));
     
     direction_ = direction_.normalize();
+    vector3 ppos = position_;
     position_ += (lspeed_ + rspeed_) / 2 * vector3(coords[0] * cos(beta)
         - coords[2] * sin(beta), 
         coords[1], 
@@ -135,6 +141,13 @@ void controller::draw()
     direction_.getAs4Values(coords);
     //std::cout << "POSITION: " << coords[0] << " " << coords[1] << " " << coords[2] << std::endl;
     node_->setPosition(position_);
+
+    /*if (CheckForCollision(nWorld_, land_, SObject(node_, nwtn_collision_)))
+    {
+        position_ = ppos;
+        node_->setPosition(position_);
+    }*/
+    
     rotation = -atan2(coords[2], coords[0]);
     //std::cout << rotation << std::endl;
     node_->setRotation(vector3(0, -90 + rotation * 180 / PI, 0));

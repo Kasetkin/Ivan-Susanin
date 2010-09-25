@@ -19,6 +19,12 @@ if (NOT QScintilla_FOUND)
     message(FATAL "QScintilla not found, try set QScintilla_ROOT")
 endif (NOT QScintilla_FOUND)
 
+find_package(Newton)
+
+if (NOT Newton_FOUND)
+    message(FATAL "Newton not found, try set Newton_ROOT")
+endif (NOT Newton_FOUND)
+
 find_package(PythonLibs)
 if (NOT PYTHONLIBS_FOUND)
     message(FATAL "Python not found, try set PythonLibs_ROOT")
@@ -36,7 +42,7 @@ link_directories (
       ${CMAKE_CURRENT_SOURCE_DIR}/../plugins
   )
 
-include_directories(include ${Irrlicht_INCLUDE_DIR} ${PYTHON_INCLUDE_PATH} ${QScintilla_INCLUDE_DIR})
+include_directories(include ${Irrlicht_INCLUDE_DIR} ${PYTHON_INCLUDE_PATH} ${QScintilla_INCLUDE_DIR} ${Newton_INCLUDE_DIR})
 
 add_subdirectory(src)
 

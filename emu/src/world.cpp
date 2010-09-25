@@ -15,6 +15,9 @@
 #include "hardware.h"
 #include "controller.h"
 
+#include "newton_utils.h"
+#include <Newton.h>
+
 namespace environment
 {
 using namespace irr;
@@ -24,7 +27,8 @@ struct world::pimpl
     boost::shared_ptr<controller> controller_;
     boost::shared_ptr<boost::thread> thread_;
     irr::IrrlichtDevice *device_;
-    boost::mutex mutex_; 
+    boost::mutex mutex_;
+    NewtonWorld *nWorld_;
 };
   
 world::world(std::string const & title, 
@@ -57,10 +61,15 @@ world::world(std::string const & title,
     data_->device_->getFileSystem()->addZipFileArchive("../../media/map-20kdm2.pk3");
 
     scene::IAnimatedMesh* q3levelmesh = data_->device_->getSceneManager()->getMesh("20kdm2.bsp");
+
+
     scene::IMeshSceneNode* q3node = 0;
     if (q3levelmesh)
         q3node = data_->device_->getSceneManager()->addOctreeSceneNode(q3levelmesh->getMesh(0), 0, 0);
 
+    data_->nWorld_ = NewtonCreate(NULL,NULL);
+    SObject * co = new SObject(q3node, CreateTreeCollisionFromMesh(data_->nWorld_, q3levelmesh));
+    
     /*
     So far so good, we've loaded the quake 3 level like in tutorial 2. Now,
     here comes something different: We create a triangle selector. A
@@ -89,7 +98,7 @@ world::world(std::string const & title,
     }
 
         
-    data_->controller_ = boost::make_shared<controller>(data_->device_);    
+    data_->controller_ = boost::make_shared<controller>(data_->device_, co, data_->nWorld_);    
     //data_->thread_ = boost::make_shared<boost::thread>(
     //    boost::bind(&world::routine, this));
     Py_Initialize();
@@ -106,6 +115,7 @@ world::~world()
     data_->device_->closeDevice();
     boost::lock_guard<boost::mutex> lock(data_->mutex_);
     data_->device_->drop();
+    NewtonDestroy(data_->nWorld_);
 }
 
 #define PY_PREPARE(foo, arg)\

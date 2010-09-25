@@ -7,6 +7,8 @@ set(SOURCES
     hardware.cpp
 
     mainwindow.cpp
+
+    newton_utils.cpp
 )
 
 set(MOC_HEADERS
@@ -28,6 +30,7 @@ target_link_libraries(emu
     ${Irrlicht_LIBRARIES}
     ${PYTHON_LIBRARIES}
     ${QScintilla_LIBRARIES}
+    ${Newton_LIBRARIES}
     png
     jpeg
     glut

@@ -6,6 +6,8 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 
+#include "newton_utils.h"
+
 //forward declarations
 namespace irr
 {
@@ -17,13 +19,14 @@ namespace scene
 }
 class IrrlichtDevice;
 }
+class NewtonCollision;
 
 namespace environment
 {
 class controller
 {
   public:
-    controller(irr::IrrlichtDevice * device);
+    controller(irr::IrrlichtDevice * device, SObject * land, NewtonWorld *nWorld);
     ~controller();
     double ray_traverse(vector3 const & direction) const;
     double cone_traverse(vector3 const & direction, 
@@ -39,6 +42,9 @@ class controller
     irr::scene::ISceneCollisionManager * collision_manager_;
     irr::scene::ICameraSceneNode * camera_;
     irr::scene::IAnimatedMeshSceneNode* node_;
+    NewtonCollision * nwtn_collision_;
+    NewtonWorld *nWorld_;
+    SObject * land_;
     vector3 position_;
     vector3 direction_;
     double lspeed_, rspeed_;
