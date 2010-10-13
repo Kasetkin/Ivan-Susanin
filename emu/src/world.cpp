@@ -125,13 +125,20 @@ world::~world()
       object main = import("__main__");\
       object global(main.attr("__dict__"));\
       hardware * hw = new hardware(data_->controller_);\
+      object Tvector = class_<py_v3>("py_v3")\
+           .def("x", &py_v3::x)\
+           .def("y", &py_v3::y)\
+           .def("z", &py_v3::z);\
+      global["py_v3"] = Tvector;\
       object Tclass = class_<hardware>("hardware", init<hardware>())\
           .def("ray_distance", &hardware::ray_distance)\
-          .def("set_speed", &hardware::set_speed);\
+          .def("set_speed", &hardware::set_speed)\
+          .def("destination", &hardware::destination);\
       object hard = Tclass(*hw);\
       global["robo"] = hard;\
-      data_->py_thread_ = boost::make_shared<boost::thread>(\
-        boost::bind(&foo, arg.c_str(), global, global));\
+      foo(arg.c_str(), global, global);\
+      /*data_->py_thread_ = boost::make_shared<boost::thread>(\
+        boost::bind(&foo, arg.c_str(), global, global));*/\
     }\
     catch (boost::python::error_already_set)\
     {\
@@ -149,7 +156,7 @@ void world::run_file(std::string const & file)
 {
 //  boost::lock_guard<boost::mutex> lock(data_->mutex_);
   PY_PREPARE(exec_file, file)
-    
+
 }
 
 void world::start()

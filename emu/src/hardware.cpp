@@ -32,4 +32,12 @@ void hardware::set_speed(double left, double right)
 {
     robo_->set_speed(left, right);
 }
+
+py_v3 hardware::destination(double x, double y, double z)
+{
+    return py_v3(robo_->destination(x, y, z));
 }
+
+
+}
+

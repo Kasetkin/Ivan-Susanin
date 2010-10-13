@@ -37,6 +37,7 @@ class controller
     void set_speed(double left, 
                    double right);
     void draw();
+    vector3 destination(double x, double y, double z);
     
   private:
     irr::scene::ISceneCollisionManager * collision_manager_;

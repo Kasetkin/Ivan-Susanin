@@ -160,5 +160,16 @@ void controller::draw()
     //camera_->setTarget(position_ + direction_);
 }
 
+vector3 controller::destination(double x, double y, double z)
+{
+      float coords[4];
+      vector3 res = vector3(x, y, z) - position_;
+      res.rotateXZBy(rotation * 180 / PI);
+      
+      //res.getAs4Values(coords);
+      return res;//vector3(-coords[2] * sin(rotation) + coords[0] * cos(rotation) * sin(rotation), coords[1], coords[2] * cos(rotation) + coords[0] * sin(rotation));
+}
+
+
 }
 

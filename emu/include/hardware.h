@@ -20,6 +20,7 @@ class hardware
     double ray_distance(double x, double y, double z) const;
     double ir_distance(double x, double y, double z) const;
     double wave_distance(double x, double y, double z) const;
+    py_v3 destination(double x, double y, double z);
       //controls
     void set_speed(double left, double right);
     
