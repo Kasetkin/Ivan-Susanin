@@ -9,6 +9,8 @@ set(SOURCES
     mainwindow.cpp
 
     newton_utils.cpp
+
+    #grid.cpp
 )
 
 set(MOC_HEADERS
@@ -40,3 +42,5 @@ target_link_libraries(emu
     ${QT_LIBRARIES}
 
 )
+
+add_executable(grid grid.cpp grid_test.cpp)
