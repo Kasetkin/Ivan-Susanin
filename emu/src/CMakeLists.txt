@@ -10,7 +10,7 @@ set(SOURCES
 
     newton_utils.cpp
 
-    #grid.cpp
+    grid.cpp
 )
 
 set(MOC_HEADERS

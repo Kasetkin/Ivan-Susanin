@@ -3,6 +3,9 @@
 #include <queue>
 #include <set>
 #include <cmath>
+#include <numeric>
+#include <cstdlib>
+#include <iostream>
 
 grid::grid(int size, double resolution) :
     map(size, std::vector<bool>(size, 0)), resolution_(resolution)
@@ -15,6 +18,7 @@ grid::~grid()
 
 void grid::add_obstacle(double x, double y)
 {
+      std::cout << "WALL" << (int)(x / resolution_) + map.size() / 2 << (int)(y / resolution_) + map.size() / 2 << std::endl;
       map[(int)(x / resolution_) + map.size() / 2][(int)(y / resolution_) + map.size() / 2] = 1;
 }
 
@@ -29,6 +33,7 @@ struct node
     node();
     ~node();
     bool operator < (node const & n) const;
+    node & operator =(node const & n);
     bool valid() const;
     node get_parent() const;
     int & x() const;
@@ -56,14 +61,31 @@ node::node(node const & n)
         ++(ptr->ref);
 }
 
+node & node::operator =(node const & n)
+{
+    if (ptr)
+    {
+        --(ptr->ref);
+        if (!(ptr->ref))
+          delete ptr;
+    }
+    ptr = n.ptr;
+    if (ptr)
+        ++(ptr->ref);
+}
+
 node::node (int x, int y, double cost, node const & parent) :
     ptr(new body)
 {
+    if (!parent.valid())
+      std::cout << "WTF PARENT INVALID" << std::endl;
     ptr->ref = 1;
     ptr->x = x;
     ptr->y = y;
     ptr->cost = cost;
     ptr->parent = parent;
+    if (!ptr->parent.valid())
+      std::cout << "WTF PARENT INVALID" << std::endl;
 }
 
 node::node (int x, int y, double cost) :
@@ -86,20 +108,26 @@ node::~node()
 
 bool node::operator < (node const & n) const
 {
-    return ptr->cost < n.ptr->cost;
+    return ptr->cost > n.ptr->cost;
 }
 
 bool node::valid() const
 {
-    return ptr != 0;
+    return (ptr != 0);
 }
 
 node node::get_parent() const
 {
     if (ptr)
+    {
+        std::cout << "PARENT " << ptr->parent.valid() << std::endl;
         return ptr->parent;
+    }
     else
+    {
+        std::cout << "INVALID" << std::endl;
         return node();
+    }
 }
 
 int & node::x() const
@@ -123,45 +151,50 @@ bool operator < (std::pair<int, int> const & a, std::pair<int, int> const & b)
       return a.first < b.first;
     return a.second < b.second;
 }
-#include <iostream>
+
 std::list<std::pair<double, double> > grid::make_path(double x, double y, double px, double py) const
 {
-      int tx = (int)(px / resolution_);
-      int ty = (int)(py / resolution_);
-      std::cout << tx << " = " << ty  << std::endl;
+      int tx = (int)(px / resolution_) + map.size() / 2;
+      int ty = (int)(py / resolution_) + map.size() / 2;
       std::priority_queue<node> q;
-      q.push(node((int)(x / resolution_), (int)(y / resolution_), x * x + y * y));
+      q.push(node((int)(x / resolution_) + map.size() / 2, 
+                  (int)(y / resolution_) + map.size() / 2, 
+                  (x - tx) * (x - tx) +
+                  (y - ty) * (y - ty)));
       
       std::set<std::pair<int, int> > marked;
       marked.insert(std::make_pair(q.top().x(), q.top().y()));
       node end;
-      std::cout << "ADD" << std::endl;
+      
       while (!q.empty())
       {
             node n = q.top();
+            //std::cout << "V " << n.x() << " " << n.y() << std::endl;
             q.pop();
-            std::cout << "POP" << std::endl;
             for (int i = -1; i <= 1; ++i)
               for (int j = -1; j <= 1; ++j)
               {
                   if (n.x() + i < 0 || n.x() + i >= map.size() || n.y() + j < 0 || n.y() + j >= map.size())
                       continue;
-                  if (std::abs(i) + std::abs(j) == 1)
+                  if (i || j)//(std::abs(i) + std::abs(j) == 1)
                   {
-                        std::cout << (n.x() + i) << " " <<  (n.y() + j) << std::endl;
                         if (!has_obstacle(n.x() + i, n.y() + j) && marked.count(std::make_pair(n.x() + i, n.y() + j)) <= 0)
                         {
-                              std::cout << "GO " << (n.x() + i) << " " <<  (n.y() + j) << std::endl;
+                              node ne(n.x() + i, n.y() + j, 
+                                      n.cost() - 
+                                      (n.x() - tx) * (n.x() - tx) + 
+                                      (n.y() - ty) * (n.y() - ty) + 
+                                      (n.x() - tx + i) * (n.x() - tx + i) + 
+                                      (n.y() - ty + j) * (n.y() - ty + j), n);
+                              //std::cout << "V " << ne.x() << " " << ne.y() << std::endl;
                               if (n.x() + i == tx && n.y() + j == ty)
                               {
-                                  end = n;
-                                  std::cout << "FOUND" << std::endl;
+                                  end = ne;
                                   goto finish;
                               }
-                              node ne(n.x() + i, n.y() + j, n.cost() - n.x() * n.x() + n.y() * n.y() + (n.x() + i) * (n.x() + i) + (n.y() + j) * (n.y() + j), n);\
-                              std::cout << "ADD" << std::endl;
                               q.push(ne);
-                              marked.insert(std::make_pair(ne.x(), n.y()));
+                              marked.insert(std::make_pair(ne.x(), ne.y()));
+                              
                         }
                   }
               }      
@@ -172,16 +205,20 @@ std::list<std::pair<double, double> > grid::make_path(double x, double y, double
           std::list<std::pair<double, double> > path;
           while (end.valid())
           {
-              path.push_front(std::make_pair(end.x() * resolution_ + resolution_ / 2, end.y() * resolution_ + resolution_ / 2));
+              //std::cout << "TRACE" << std::endl;
+              path.push_front(std::make_pair((end.x() - map.size() / 2) * resolution_ + resolution_ / 2, (end.y() - map.size() / 2) * resolution_ + resolution_ / 2));
               end = end.get_parent();
           }
           return path;
       }
       else
+      {
+        std::cout << "NO PATH" << std::endl;
         return std::list<std::pair<double, double> >();
+      }
 }
 
 bool grid::has_obstacle(int x, int y) const
 {
-      return map[x][y] == 1;
+      return map[x][y];
 }

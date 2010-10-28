@@ -18,6 +18,8 @@
 #include "newton_utils.h"
 #include <Newton.h>
 
+#include "grid.h"
+
 namespace environment
 {
 using namespace irr;
@@ -136,6 +138,17 @@ world::~world()
           .def("destination", &hardware::destination);\
       object hard = Tclass(*hw);\
       global["robo"] = hard;\
+      object pd = class_<std::pair<double, double> >("paird", init<std::pair<double, double> >())\
+          .def_readwrite("first", &std::pair<double, double>::first)\
+          .def_readwrite("second", &std::pair<double, double>::second);\
+      global["paird"] = pd;\
+      object pdl = class_<std::list<std::pair<double, double> > >("listpd", init<std::list<std::pair<double, double> > >())\
+          .def("__iter__", iterator<std::list<std::pair<double, double> > >());\
+      global["listpd"] = pdl;\
+      object gr = class_<grid>("grid", init<int, double>())\
+          .def("add_obstacle", &grid::add_obstacle)\
+          .def("make_path", &grid::make_path);\
+      global["grid"] = gr;\
       foo(arg.c_str(), global, global);\
       /*data_->py_thread_ = boost::make_shared<boost::thread>(\
         boost::bind(&foo, arg.c_str(), global, global));*/\
@@ -155,7 +168,7 @@ void world::run_script(std::string const & script)
 void world::run_file(std::string const & file)
 {
 //  boost::lock_guard<boost::mutex> lock(data_->mutex_);
-  PY_PREPARE(exec_file, file)
+    PY_PREPARE(exec_file, file)
 
 }
 
